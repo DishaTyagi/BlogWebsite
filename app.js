@@ -10,8 +10,6 @@ const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rho
 
 const app = express();
 
-let posts= [];
-
 app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({extended: true}));    //body-parser to obtain form data through req.body
@@ -30,8 +28,15 @@ const Post = mongoose.model("Post", postSchema);
 
 
 app.get('/', (req,res)=>{
-  res.render('home' , {homeContent: homeStartingContent, posts: posts});
 
+  //find all the posts in the posts cllection and render in home.ejs
+  Post.find({}, function(err, foundPosts){
+    if(!err){
+      res.render('home' , {homeContent: homeStartingContent, posts: foundPosts});
+    }else{
+      console.log(err);      
+    }
+  });
 });
 
 
@@ -41,40 +46,34 @@ app.get('/about', (req,res)=>{
 
 app.get('/contact', (req,res) =>{
   res.render('contact', {contactPageContent : contactContent});
-})
+});
 
 app.get('/compose', (req,res) => {
   res.render('compose');
-})
+});
 
 app.post('/compose', (req,res) => {
 
-  let postObject = {
+  let post = new Post({
     title: req.body.postTitle,
     content : req.body.postBody
-  };
-
-  posts.push(postObject);
-  
-  res.redirect('/');
-})
-
-app.get('/posts/:heading', (req,res) => {
-  
-  let requestedTitle = _.lowerCase(req.params.heading);
-
-  posts.forEach(post =>{
-    let storedTitle = _.lowerCase(post.title);
-
-    if(storedTitle === requestedTitle){
-      res.render('post', {postHeading: post.title, postContent: post.content});
-    }
-    // else{
-    //   console.log("Not a match!");
-      
-    // }
   });
+
+  post.save(function(err){    //callback is added just to make sure that the page is redirected to the home oage only if the post is saved
+    if(!err){
+      res.redirect('/');
+    }
+  });
+});
+
+app.get('/posts/:id', (req,res) => {
   
+  let requestedPostId = req.params.id;
+  Post.findOne({_id:requestedPostId}, function(err, foundPost){
+    if(!err){
+      res.render('post', {postHeading: foundPost.title, postContent: foundPost.content});
+    }
+  });
 });
 
 app.listen(3000, function() {
