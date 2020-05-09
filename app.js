@@ -69,8 +69,11 @@ app.get('/posts/:id', (req,res) => {
   
   const requestedPostId = req.params.id;
   Post.findOne({_id:requestedPostId}, function(err, foundPost){
-    if(!err){
+    if(foundPost){
       res.render('post', {postHeading: foundPost.title, postContent: foundPost.content});
+    }else{
+      console.log("Error. Page is unavailable.");      
+      res.send("ERROR! This page is unavailable!");
     }
   });
 });
