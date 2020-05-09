@@ -1,4 +1,3 @@
-
 const express = require("express");
 const ejs = require("ejs");
 const _ = require('lodash');
@@ -12,7 +11,7 @@ const app = express();
 
 app.set('view engine', 'ejs');
 
-app.use(express.urlencoded({extended: true}));    //body-parser to obtain form data through req.body
+app.use(express.urlencoded({extended: true}));    
 app.use(express.static("public"));
 
 mongoose.connect('mongodb://localhost:27017/blogDB', { useNewUrlParser: true , useUnifiedTopology: true, useFindAndModify: false });
@@ -59,7 +58,7 @@ app.post('/compose', (req,res) => {
     content : req.body.postBody
   });
 
-  post.save(function(err){    //callback is added just to make sure that the page is redirected to the home oage only if the post is saved
+  post.save(function(err){    //callback is added just to make sure that the page is redirected to the home page only if the post is saved
     if(!err){
       res.redirect('/');
     }
@@ -68,7 +67,7 @@ app.post('/compose', (req,res) => {
 
 app.get('/posts/:id', (req,res) => {
   
-  let requestedPostId = req.params.id;
+  const requestedPostId = req.params.id;
   Post.findOne({_id:requestedPostId}, function(err, foundPost){
     if(!err){
       res.render('post', {postHeading: foundPost.title, postContent: foundPost.content});
